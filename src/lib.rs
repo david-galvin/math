@@ -1,5 +1,5 @@
 use rug::{Assign, Integer};
-use smallvec::{SmallVec};
+//use smallvec::{SmallVec};
 
 pub fn factorial(n: usize) -> usize {
     let mut result = 1;
@@ -21,6 +21,18 @@ pub fn choose(n: usize, k: usize) -> usize {
         result /= i+1;
     }
     result
+}
+
+pub fn usize_to_vec_of_set_bits(v: usize) -> Vec<usize> {
+  let mut w: usize = v;
+  let mut ret_vec = Vec::<usize>::new();
+  
+  while w > 0 {
+    let index: usize = w.trailing_zeros() as usize;
+    ret_vec.push(index);
+    w ^= 1 << index;
+  }
+  return ret_vec;
 }
 
 pub fn get_next_bit_permutation(v: usize) -> usize {
@@ -49,6 +61,35 @@ pub fn set_next_bit_permutation_u64(v: &mut u64) {
 }
 
 
+pub struct SetBitGetter {
+  val: u64,
+  bit: u64,
+}
+
+impl SetBitGetter {
+  pub fn new() -> Self {
+    SetBitGetter {
+      val: 0,
+      bit: 0
+    }
+  }
+  
+  pub fn reset(&mut self, val: u64) {
+    self.val = val;
+  }
+  
+  pub fn are_there_more_bits(&self) -> bool {
+    return self.val > 0;
+  }
+  
+  pub fn get_bit(&mut self) -> u64 {
+    self.bit = 1 << self.val.trailing_zeros();
+    self.val ^= self.bit;
+    return self.bit;
+  }
+}
+
+/*
 pub struct Subsets {
   indices: SmallVec::<[usize; 20]>,
   set_size: usize,
@@ -134,7 +175,7 @@ impl Subsets {
     &self.indices
   }
 }
-
+*/
 
 pub struct Combinations {
     result: Integer,
@@ -260,7 +301,7 @@ mod tests {
     assert_eq!(combinations.result, Integer::from(21));
   }
   
-  #[test]
+/*  #[test]
   fn test_subsets() {
     let mut subsets = Subsets::new();
     subsets.reset(5, 3);
@@ -281,7 +322,7 @@ mod tests {
     subsets.next();      // [1, 2]
     assert_eq!(subsets.get_indices_ref()[0], 1);
     assert_eq!(subsets.is_done(), true);
-  }
+  }*/
   
 /*
   #[test]
@@ -293,5 +334,16 @@ mod tests {
   #[test]
   fn test_trailing_zeros_builtin() {
     assert_eq!(trailing_zeros_builtin(&Integer::from(16)), 4);
+  } 
+  
+  #[test]
+  fn test_get_set_bits() {
+    let mut gsb = SetBitGetter::new();
+    gsb.reset(13); //  1101 
+    assert_eq!(gsb.get_bit(), 1);
+    assert_eq!(gsb.get_bit(), 4);
+    assert_eq!(gsb.are_there_more_bits(), true);
+    assert_eq!(gsb.get_bit(), 8);
+    assert_eq!(gsb.are_there_more_bits(), false);
   } 
 }
