@@ -7,3 +7,4 @@ edition = "2021"
 smallvec = "1.9.0"
 gmp-mpfr-sys = "1.6.4"
 rug = { version = "1.25.0", default-features = false, features = ["integer"] }
+rustc-hash = "2.0.0"

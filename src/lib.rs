@@ -1,4 +1,10 @@
+#![allow(dead_code)]
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+#![allow(unused_mut)]
+
 use rug::{Assign, Integer};
+use rustc_hash::{FxHashSet};
 //use smallvec::{SmallVec};
 
 pub fn factorial(n: usize) -> usize {
@@ -176,6 +182,53 @@ impl Subsets {
   }
 }
 */
+
+
+// Is setdiff(candidate, {x}) in 'included' for all x in candidate?
+// initialize a FxHashSet::<u64> 'included' from sets such that 
+// included[x] records whether x is a member of sets.
+pub fn can_expand(included: &FxHashSet::<u64>, candidate: u64) -> bool {
+  let mut singleton = 1; // single-element set {x}
+
+  while singleton < candidate {
+    if singleton & candidate == singleton {
+      let setdiff = candidate - singleton;
+      if !included.contains(&setdiff) {
+        return false;
+      }
+    }
+
+    singleton <<= 1; // from {x} to {x+1}
+  }
+
+  return true;
+}
+
+// Get all expansions of 'sets' (integers of width n_bits).
+pub fn get_expansions(sets: &Vec::<u64>, n_bits: u64) -> Vec<u64> {
+  //println!("get_expansions(sets: {:?}, n_bits: {})", sets, n_bits);
+  let included = sets.iter().cloned().collect();
+  let mut results = Vec::new();
+
+  for &set in sets {
+    let mut element_to_add = 1;
+
+    // try adding the remaining elements one-by-one
+    for _ in 0..n_bits {
+      // only add elements larger than max(set)
+      if element_to_add > set {
+        let candidate = set + element_to_add;
+        if can_expand(&included, candidate) {
+          results.push(candidate);
+        }
+      }
+
+      element_to_add <<= 1;
+    }
+  }
+  //println!("{:?}\n", results);
+  return results;
+}
 
 pub struct Combinations {
     result: Integer,
