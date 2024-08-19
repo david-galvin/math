@@ -1,11 +1,10 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-#![allow(unused_mut)]
+//#![allow(dead_code)]
+//#![allow(unused_imports)]
+//#![allow(unused_variables)]
+//#![allow(unused_mut)]
 
 use rug::{Assign, Integer};
 use rustc_hash::{FxHashSet};
-//use smallvec::{SmallVec};
 
 pub fn factorial(n: usize) -> usize {
     let mut result = 1;
@@ -38,7 +37,7 @@ pub fn usize_to_vec_of_set_bits(v: usize) -> Vec<usize> {
     ret_vec.push(index);
     w ^= 1 << index;
   }
-  return ret_vec;
+  ret_vec
 }
 
 pub fn get_next_bit_permutation(v: usize) -> usize {
@@ -72,6 +71,12 @@ pub struct SetBitGetter {
   bit: u64,
 }
 
+impl Default for SetBitGetter {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl SetBitGetter {
   pub fn new() -> Self {
     SetBitGetter {
@@ -85,13 +90,13 @@ impl SetBitGetter {
   }
   
   pub fn are_there_more_bits(&self) -> bool {
-    return self.val > 0;
+    self.val > 0
   }
   
   pub fn get_bit(&mut self) -> u64 {
     self.bit = 1 << self.val.trailing_zeros();
     self.val ^= self.bit;
-    return self.bit;
+    self.bit
   }
 }
 
@@ -187,28 +192,29 @@ impl Subsets {
 // Is setdiff(candidate, {x}) in 'included' for all x in candidate?
 // initialize a FxHashSet::<u64> 'included' from sets such that 
 // included[x] records whether x is a member of sets.
-pub fn can_expand(included: &FxHashSet::<u64>, candidate: u64) -> bool {
-  let mut singleton = 1; // single-element set {x}
+pub fn can_expand(included: &FxHashSet<u64>, candidate: u64) -> bool {
+  let mut singleton: u64 = 1;
+  let mut setdiff: u64;
 
-  while singleton < candidate {
+  while singleton <= candidate {
     if singleton & candidate == singleton {
-      let setdiff = candidate - singleton;
+      setdiff = candidate - singleton;
       if !included.contains(&setdiff) {
         return false;
       }
     }
 
-    singleton <<= 1; // from {x} to {x+1}
+    singleton <<= 1; // Use non-wrapping shift for speed
   }
 
-  return true;
+  true
 }
 
 // Get all expansions of 'sets' (integers of width n_bits).
 pub fn get_expansions(sets: &Vec::<u64>, n_bits: u64) -> Vec<u64> {
-  //println!("get_expansions(sets: {:?}, n_bits: {})", sets, n_bits);
   let included = sets.iter().cloned().collect();
   let mut results = Vec::new();
+  let mut candidate: u64;
 
   for &set in sets {
     let mut element_to_add = 1;
@@ -217,7 +223,7 @@ pub fn get_expansions(sets: &Vec::<u64>, n_bits: u64) -> Vec<u64> {
     for _ in 0..n_bits {
       // only add elements larger than max(set)
       if element_to_add > set {
-        let candidate = set + element_to_add;
+        candidate = set + element_to_add;
         if can_expand(&included, candidate) {
           results.push(candidate);
         }
@@ -226,8 +232,7 @@ pub fn get_expansions(sets: &Vec::<u64>, n_bits: u64) -> Vec<u64> {
       element_to_add <<= 1;
     }
   }
-  //println!("{:?}\n", results);
-  return results;
+  results
 }
 
 pub struct Combinations {
@@ -258,11 +263,9 @@ impl Combinations {
     }
     
     pub fn get_next_index(&mut self) -> usize {
-      //println!("        pre tmp1: {0:b}", self.temp1);
-      let index: u32 = trailing_zeros_builtin(&mut self.temp1);
+      let index: u32 = trailing_zeros_builtin(&self.temp1);
       self.temp1.set_bit(index, false);
-      //println!("        pst tmp1: {0:b}\n", self.temp1);
-      return index as usize;
+      index as usize
     }
     
     pub fn print_result(&self) {
